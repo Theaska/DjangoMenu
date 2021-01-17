@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import exceptions
 from django.db.models import Max
 from django.shortcuts import resolve_url
 from django.utils.translation import ugettext_lazy as _
@@ -7,7 +8,8 @@ from django.utils.translation import ugettext_lazy as _
 class Menu(models.Model):
     title = models.CharField(
         _('title of menu'), 
-        max_length=128
+        max_length=128,
+        unique=True
     )
 
     updated = models.DateTimeField(auto_now=True)
@@ -52,7 +54,7 @@ class MenuItem(models.Model):
     def url(self):
         try:
             return resolve_url(self.raw_url)
-        except NoReverseMatch:
+        except exceptions.NoReverseMatch:
             return self.raw_url
         
     def __str__(self):
