@@ -1,0 +1,16 @@
+/* .hidden:hover {
+    visibility: hidden;
+} */
+
+.menu {
+    display: flex;
+    flex-direction: row;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+.show {
+    visibility: visible;
+}

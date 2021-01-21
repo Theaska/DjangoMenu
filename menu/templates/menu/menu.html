@@ -1,16 +1,9 @@
-<ul>
-    {% for menu_item in menu_items %}
-        <li>
-            {% if request.path != menu_item.url %}
-                <a href="{{ menu_item.url }}">{{ menu_item.title }}</a>
-            {% else %}
-                <span>{{ menu_item.title }}
-            {% endif %}
-            {% if menu_item.children %}
-                {% with menu_items=menu_item.children %}
-                    {% include 'menu/menu.html' %}
-                {% endwith %}
-            {% endif %}
-        </li>
-    {% endfor %}
-</ul>   
+{% load static %}
+
+<div class='menu'>
+    {% include 'menu/menu_items.html' %}
+</div>
+
+<link href="{% static 'menu/css/menu.css' %}" rel='stylesheet'>
+<script src="{% static 'menu/js/jquery.min.js' %}"></script>
+<script src="{% static 'menu/js/menu.js' %}"></script>

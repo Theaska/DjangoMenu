@@ -1,3 +1,6 @@
+from __future__ import annotations
+from typing import Optional, List
+
 from django.urls.exceptions import NoReverseMatch
 from django.db.models import F
 from django.shortcuts import resolve_url
@@ -7,54 +10,106 @@ from menu.exceptions import MenuException
 
 
 class MenuItemBase:
-
-    def __init__(self, item, children=None):
+    def __init__(
+        self, 
+        item: List[dict], 
+        children: Optional[List[MenuItemBase]] = None, 
+        parent: Optional[MenuItemBase] = None,
+        classes: Optional[str]  = '',
+        level: Optional[int] = 1,
+    ):
+        """
+            item        - элемент меню представленный в виде списка элементов словаря
+            children    - дочерние элементы меню
+            parent      - родительский элемент меню
+            classes     - классы, которые будут отображены в темплейте у этого элемента меню
+        """
         self.item = item
         self._children = []
+        self._parent = parent
+        self._active = False
+        self.classes = classes
+        self.level = level
         if children:
-            self._check_children(children)
             self._children.extend(children) 
 
-    def _check_children(self, children):
-        if not all(isinstance(child, self.__class__) for child in children):
-            raise MenuException(f'children items have to be {self._class}')
+    def activate(self):
+        self.recursive_activate()
+
+    def recursive_activate(self):
+        """
+            рекурсивно делает элемент меню и его родительские элементы активными
+        """
+        self._active = True
+        if self.parent:
+            self.parent.activate()
     
     @property
-    def title(self):
-        return self.item['name']
-    
-    def add_child(self, child):
-        self._children.append(child)
+    def is_active(self):
+        """ Активен ли элемент """
+        return self._active
 
-    def add_recursive(self, menu_items):
-        print('add_recursive', menu_items)
-        _child = list((MenuItemBase(item) for item in menu_items if item['parent']==self.item['pk']))
-        for child in _child:
-            print(child)
-            child.add_recursive(menu_items)
-        self._children.extend(_child)
+    @property
+    def title(self):
+        """ Название элемента меню """
+        return self.item['name']
 
     @property
     def children(self):
         return self._children
 
     @property
+    def parent(self):
+        return self._parent
+
+    @property
+    def id(self):
+        return self.item['pk']
+
+    @property
     def url(self):
         try:
             return resolve_url(self.item.get('raw_url'))
         except NoReverseMatch:
-            return self.item.get('raw_url')
+            return self.item.get('raw_url').strip()
+    
+    def add_child(self, child):
+        self._children.append(child)
+
+    def add_children(self, children):
+        self._children.extend(children)
+
+    def add_recursive(self, menu_items, current_path=None):
+        """ Рекурсивно добавляет элементы меню. 
+            current_path  - текущий url, чтобы знать, какие элементы меню активировать
+        """
+        for item in menu_items:
+            if item.get('parent') == self.id:
+                item_menu = MenuItemBase(item, parent=self, level=self.level+1)
+                item_menu.add_recursive(menu_items, current_path)
+                if current_path and current_path == item_menu.url:
+                    item_menu.activate()
+                self.add_child(item_menu)
 
     def __repr__(self):
         return f'{self.item["name"]} / {self.url}'
 
 
 class MenuBase:
+    """
+        Класс меню. 
+        menu_items_model    - модель БД, из которой будут браться элементы меню
+        menu_name_query     - по какому полю будут фильтроваться меню
+        values              - какие поля получить из БД
+    """
     menu_items_model = MenuItem
     menu_name_query = 'menu__title__iexact'
     values = ('name', 'parent', 'pk', 'raw_url')
 
-    def __init__(self, menu_name):
+    def __init__(self, menu_name: str):
+        """
+            menu_name - название меню в БД
+        """
         self._roots = []
         self.menu_name = menu_name
         self.menu_items = self._get_menu_items()
@@ -66,22 +121,26 @@ class MenuBase:
                 *self.values,
             ))
 
-    def make_menu(self):
-        print(self.roots)
+    def make_menu(self, request=None):
+        """ Запускает построение меню. 
+            request - HttpRequest для получения текущего урла
+        """
         for root in self.roots:
-            print(root)
-            root.add_recursive(self.menu_items)
-        # return self
+            current_path = getattr(request, 'path', '')
+            root.add_recursive(self.menu_items, current_path=current_path)
 
     @property
     def roots(self):
+        """ Главные элементы меню.
+        """
         if not self._roots:
-            self._roots = list(MenuItemBase(item) for item in self.menu_items if item['parent'] is None)
+            self._roots = list(
+                MenuItemBase(item) 
+                for item in self.menu_items if item['parent'] is None
+            )
         return self._roots
 
     def __iter__(self):
-        print(self.roots)
-        print(self._roots)
         return iter(self.roots)
     
 
