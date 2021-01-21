@@ -1,10 +1,8 @@
 
 <ul>
     {% for menu_item in menu_items %}
-        <li class="menu-item
-        {% if menu_item.is_active or menu_item.parent.is_active %}show
-        {% elif menu_item.level > 1 and not menu_item.parent.is_active %}hidden{% endif %} {{ menu_item.classes }}">
-            {% if not menu_item.is_active %}
+        <li class="menu-item {{ menu_item.classes }}">
+            {% if request.path != menu_item.url %}
                 <a href="{{ menu_item.url }}">{{ menu_item.title }}</a>
             {% else %}
                 <span>{{ menu_item.title }}</span>

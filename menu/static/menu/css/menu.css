@@ -1,7 +1,3 @@
-/* .hidden:hover {
-    visibility: hidden;
-} */
-
 .menu {
     display: flex;
     flex-direction: row;
@@ -9,8 +5,12 @@
 
 .hidden {
     visibility: hidden;
+    height: 0 px;
+    width: 0 px;
 }
 
 .show {
     visibility: visible;
+    height: 100 px;
+    width: 100 px;
 }

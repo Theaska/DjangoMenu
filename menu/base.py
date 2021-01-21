@@ -28,7 +28,7 @@ class MenuItemBase:
         self._children = []
         self._parent = parent
         self._active = False
-        self.classes = classes
+        self._classes = classes
         self.level = level
         if children:
             self._children.extend(children) 
@@ -43,6 +43,15 @@ class MenuItemBase:
         self._active = True
         if self.parent:
             self.parent.activate()
+
+    @property
+    def classes(self):
+        classes = self._classes
+        if self.is_active or getattr(self.parent, 'is_active', False) or self.level == 1:
+            classes += ' show'
+        else:
+            classes += ' hidden'
+        return classes
     
     @property
     def is_active(self):
