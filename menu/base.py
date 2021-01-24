@@ -98,7 +98,7 @@ class MenuItemBase:
             if item.get('parent') == self.id:
                 item_menu = MenuItemBase(item, parent=self, level=self.level+1)
                 item_menu.add_recursive(menu_items, current_path)
-                if current_path and current_path == item_menu.url:
+                if current_path is not None and current_path == item_menu.url:
                     item_menu.activate()
                 self.add_child(item_menu)
 
