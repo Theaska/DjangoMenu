@@ -34,3 +34,8 @@
       <li> Сортировка элемента: <i> Order </i>.
     </ul>
   </li>
+  <li>
+    Отрисовка меню на странице:
+    {% load render_menu %}
+    {% render_menu 'menu' %} # menu - имя меню
+  </li>
