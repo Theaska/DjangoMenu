@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Optional, List
+from urllib import parse
 
 from django.urls.exceptions import NoReverseMatch
 from django.db.models import F
@@ -81,7 +82,7 @@ class MenuItemBase:
         try:
             return resolve_url(self.item.get('raw_url'))
         except NoReverseMatch:
-            return self.item.get('raw_url').strip()
+            return parse.quote_plus(self.item.get('raw_url').strip())
     
     def add_child(self, child):
         self._children.append(child)

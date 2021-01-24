@@ -4,7 +4,6 @@ from django.contrib import admin
 from django.urls import resolve, exceptions
 from django.shortcuts import resolve_url
 from django import forms
-from urllib import parse
 from .models import Menu, MenuItem
 
 
