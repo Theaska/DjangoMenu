@@ -11,7 +11,6 @@ def render_menu(context, menu_name, template_name='menu/menu.html'):
     menu.make_menu(request=context.get('request'))
     return loader.render_to_string(template_name=template_name, context={
         'menu_items': menu, 
-        'level': 1,
-        }, request=context.get('request'))
+    }, request=context.get('request'))
 
 
