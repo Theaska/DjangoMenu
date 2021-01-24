@@ -36,6 +36,6 @@
   </li>
   <li>
     Отрисовка меню на странице:
-    {% load render_menu %}
-    {% render_menu 'menu' %} # menu - имя меню
+    <br> {% load render_menu %}
+    <br> {% render_menu 'menu' %} # menu - имя меню
   </li>
