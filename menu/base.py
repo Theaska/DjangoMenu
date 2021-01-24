@@ -48,8 +48,6 @@ class MenuItemBase:
         Show - если нужно показывать элемент меню (если элемент активен, если родительский элемент активен или элемент является главным).
         Hidden - скрыть элемент меню. """
         classes = self._classes
-        print(self.parent)
-        print(getattr(self.parent, 'is_active', False), self)
         if self.is_active or getattr(self.parent, 'is_active', False) or self.level == 1:
             classes += ' show'
         else:
