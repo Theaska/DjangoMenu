@@ -7,4 +7,5 @@ app_name = 'main'
 
 urlpatterns = [
     path('', MainView.as_view(), name='index'),
+    path('test/', MainView.as_view(), name='test'),
 ]

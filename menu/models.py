@@ -29,7 +29,7 @@ class MenuItem(models.Model):
         blank=True, 
         null=True, 
         related_name='children',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
     )
     menu = models.ForeignKey(
         Menu, 

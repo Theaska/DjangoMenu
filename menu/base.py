@@ -37,15 +37,16 @@ class MenuItemBase:
         self.recursive_activate()
 
     def recursive_activate(self):
-        """
-            рекурсивно делает элемент меню и его родительские элементы активными
-        """
+        """ Рекурсивно делает элемент меню и его родительские элементы активными """
         self._active = True
         if self.parent:
             self.parent.activate()
 
     @property
     def classes(self):
+        """ Классы, для стилей   
+        Show - если нужно показывать элемент меню (если элемент активен, если родительский элемент активен или элемент является главным).
+        Hidden - скрыть элемент меню. """
         classes = self._classes
         if self.is_active or getattr(self.parent, 'is_active', False) or self.level == 1:
             classes += ' show'

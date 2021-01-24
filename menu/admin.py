@@ -1,6 +1,10 @@
+from functools import partial
+
 from django.contrib import admin
-from django.urls import resolve
+from django.urls import resolve, exceptions
+from django.shortcuts import resolve_url
 from django import forms
+from urllib import parse
 from .models import Menu, MenuItem
 
 
@@ -9,13 +13,10 @@ class MenuItemForm(forms.ModelForm):
         model = MenuItem
         fields = '__all__'
 
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #     if getattr(self.instance, 'menu', None):
-    #         self.fields['parent'].queryset = MenuItem.objects.filter(
-    #             menu=self.instance.menu,
-    #         ).exclude(pk=self.instance.pk)
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['parent'].queryset = self.fields['parent'].queryset.exclude(pk=self.instance.pk)
+            
 
 class MenuItemsInline(admin.StackedInline):
     model = MenuItem
@@ -23,17 +24,23 @@ class MenuItemsInline(admin.StackedInline):
     extra = 0
     form = MenuItemForm
 
-    def __init__(self, *args, **kwargs):
-        print(args, kwargs)
-        super().__init__(*args, **kwargs)
+    def wrap_callback(self, request, obj=None, **kwargs):
+        """ Для того, чтобы в поле parent показывались только элементы меню, у которых меню = текущему объекту меню """
+        obj = obj
+        request = request
+        def callback(field, **kwargs):
+            nf = field.formfield(**kwargs)
+            if field.name == 'parent':
+                nf.queryset = MenuItem.objects.filter(menu=obj)
+            return nf
+        return callback
 
-    def get_queryset(self, request):
-        resolved = resolve(request.path_info)
-        menu = None
-        if resolved.kwargs.get('object_id'):
-            menu = self.parent_model.objects.get(pk=resolved.kwargs.get('object_id'))
-        print(super().get_queryset(request).filter(menu=menu))
-        return super().get_queryset(request).filter(menu=menu)
+    def get_formset(self, request, obj=None, **kwargs):
+        kwargs.update({
+            'formfield_callback': self.wrap_callback(request=request, obj=obj)
+        })
+        return super().get_formset(request, obj, **kwargs)
+
 
 
 @admin.register(Menu)
