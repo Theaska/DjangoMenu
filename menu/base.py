@@ -48,6 +48,8 @@ class MenuItemBase:
         Show - если нужно показывать элемент меню (если элемент активен, если родительский элемент активен или элемент является главным).
         Hidden - скрыть элемент меню. """
         classes = self._classes
+        print(self.parent)
+        print(getattr(self.parent, 'is_active', False), self)
         if self.is_active or getattr(self.parent, 'is_active', False) or self.level == 1:
             classes += ' show'
         else:
@@ -102,7 +104,7 @@ class MenuItemBase:
                 self.add_child(item_menu)
 
     def __repr__(self):
-        return f'{self.item["name"]} / {self.url}'
+        return f'name: {self.item["name"]}, path: {self.url}, active: {self.is_active}'
 
 
 class MenuBase:
@@ -137,6 +139,8 @@ class MenuBase:
         """
         for root in self.roots:
             current_path = getattr(request, 'path', '')
+            if root.url == current_path:
+                root.activate()
             root.add_recursive(self.menu_items, current_path=current_path)
 
     @property
